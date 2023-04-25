@@ -7,7 +7,6 @@ namespace Picture_App
 
         string picturePath = "";
         string markPath = "";
-        Image watermarkImage;
 
         public Main()
         {
@@ -16,22 +15,7 @@ namespace Picture_App
 
         private void btnAddPicture_Click(object sender, EventArgs e)
         {
-            OpenFileDialog openFileDialog = new OpenFileDialog();
-            openFileDialog.Filter = "Pliki obrazów (*.jpg, *.jpeg, *.png, *.bmp)|*.jpg;*.jpeg;*.png;*.bmp";
-
-            if (openFileDialog.ShowDialog() == DialogResult.OK)
-            {
-                picturePath = openFileDialog.FileName;
-                pbPicture.Image = Image.FromFile(picturePath);
-                ButtonsVisibility();
-            }
-        }
-
-         void ButtonsVisibility()
-        {
-            btnDeleteMark.Visible = !string.IsNullOrEmpty(markPath);
-            btnDeletePicture.Visible = !string.IsNullOrEmpty(picturePath);
-            btnSafe.Visible = (!string.IsNullOrEmpty(markPath) && !string.IsNullOrEmpty(picturePath));
+            picturePath = InserPictureBox(pbPicture);
         }
 
         private void btnDeletePicture_Click(object sender, EventArgs e)
@@ -64,7 +48,7 @@ namespace Picture_App
                         0, 0, watermarkImage.Width, watermarkImage.Height, GraphicsUnit.Pixel, imageAttributes);
                 }
 
-               var path = SaveImage(originalImage);
+                var path = SaveImage(originalImage);
 
                 MessageBox.Show($"Zapisano po³¹czony obraz w pliku {path}", "Informacja", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
@@ -74,26 +58,10 @@ namespace Picture_App
             }
 
         }
-         string SaveImage(Image mergeImage)
-        {
-            var mergedImagePath = Path.Combine(Path.GetDirectoryName(picturePath), 
-                Path.GetFileNameWithoutExtension(picturePath) + "_merged" + Path.GetExtension(picturePath));
-            mergeImage.Save(mergedImagePath, pbPicture.Image.RawFormat);
-
-            return mergedImagePath;
-        }
 
         private void btnAddMark_Click(object sender, EventArgs e)
         {
-            OpenFileDialog openFileDialog = new OpenFileDialog();
-            openFileDialog.Filter = "Pliki obrazów (*.jpg, *.jpeg, *.png, *.bmp)|*.jpg;*.jpeg;*.png;*.bmp";
-
-            if (openFileDialog.ShowDialog() == DialogResult.OK)
-            {
-                markPath = openFileDialog.FileName;
-                pbMark.Image = Image.FromFile(markPath);
-                ButtonsVisibility();
-            }
+            markPath = InserPictureBox(pbMark);
         }
 
         private void btnDeleteMark_Click(object sender, EventArgs e)
@@ -101,6 +69,35 @@ namespace Picture_App
             pbMark.Image = null;
             markPath = "";
             ButtonsVisibility();
+        }
+        string InserPictureBox(PictureBox pictureBox)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            openFileDialog.Filter = "Pliki obrazów (*.jpg, *.jpeg, *.png, *.bmp)|*.jpg;*.jpeg;*.png;*.bmp";
+            string path = null;
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                path = openFileDialog.FileName;
+                pictureBox.Image = Image.FromFile(picturePath);
+                ButtonsVisibility();
+            }
+            return path;
+        }
+
+        void ButtonsVisibility()
+        {
+            btnDeleteMark.Visible = !string.IsNullOrEmpty(markPath);
+            btnDeletePicture.Visible = !string.IsNullOrEmpty(picturePath);
+            btnSafe.Visible = (!string.IsNullOrEmpty(markPath) && !string.IsNullOrEmpty(picturePath));
+        }
+
+        string SaveImage(Image mergeImage)
+        {
+            var mergedImagePath = Path.Combine(Path.GetDirectoryName(picturePath),
+                Path.GetFileNameWithoutExtension(picturePath) + "_merged" + Path.GetExtension(picturePath));
+            mergeImage.Save(mergedImagePath, pbPicture.Image.RawFormat);
+
+            return mergedImagePath;
         }
     }
 }
