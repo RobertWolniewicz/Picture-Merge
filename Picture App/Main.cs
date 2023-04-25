@@ -5,23 +5,40 @@ namespace Picture_App
     public partial class Main : Form
     {
 
-        string picturePath = "";
-        string markPath = "";
+        string _picturePath = "";
+        string _markPath = "";
 
         public Main()
         {
             InitializeComponent();
+
+            if (!string.IsNullOrEmpty(Properties.Settings.Default.PicturePath))
+            {
+                _picturePath = Properties.Settings.Default.PicturePath;
+                Properties.Settings.Default.PicturePath = null;
+                pbPicture.Image = Image.FromFile(_picturePath);
+            }
+
+            if (!string.IsNullOrEmpty(Properties.Settings.Default.MarkPath))
+            {
+                _markPath = Properties.Settings.Default.MarkPath;
+                Properties.Settings.Default.MarkPath = null;
+                pbMark.Image = Image.FromFile(_markPath);
+            }
+
+            ButtonsVisibility();
         }
 
         private void btnAddPicture_Click(object sender, EventArgs e)
         {
-            picturePath = InserPictureBox(pbPicture);
+            _picturePath = InserPictureBox(pbPicture);
+            ButtonsVisibility();
         }
 
         private void btnDeletePicture_Click(object sender, EventArgs e)
         {
             pbPicture.Image = null;
-            picturePath = "";
+            _picturePath = "";
             ButtonsVisibility();
         }
 
@@ -29,8 +46,8 @@ namespace Picture_App
         {
             if (pbPicture.Image != null && pbMark.Image != null)
             {
-                Image originalImage = Image.FromFile(picturePath);
-                Image watermarkImage = Image.FromFile(markPath);
+                Image originalImage = Image.FromFile(_picturePath);
+                Image watermarkImage = Image.FromFile(_markPath);
 
                 float transparency = 0.2f;
                 ColorMatrix colorMatrix = new ColorMatrix();
@@ -61,13 +78,14 @@ namespace Picture_App
 
         private void btnAddMark_Click(object sender, EventArgs e)
         {
-            markPath = InserPictureBox(pbMark);
+            _markPath = InserPictureBox(pbMark);
+            ButtonsVisibility();
         }
 
         private void btnDeleteMark_Click(object sender, EventArgs e)
         {
             pbMark.Image = null;
-            markPath = "";
+            _markPath = "";
             ButtonsVisibility();
         }
         string InserPictureBox(PictureBox pictureBox)
@@ -78,26 +96,37 @@ namespace Picture_App
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
                 path = openFileDialog.FileName;
-                pictureBox.Image = Image.FromFile(picturePath);
-                ButtonsVisibility();
+                pictureBox.Image = Image.FromFile(path);
             }
             return path;
         }
 
         void ButtonsVisibility()
         {
-            btnDeleteMark.Visible = !string.IsNullOrEmpty(markPath);
-            btnDeletePicture.Visible = !string.IsNullOrEmpty(picturePath);
-            btnSafe.Visible = (!string.IsNullOrEmpty(markPath) && !string.IsNullOrEmpty(picturePath));
+            btnDeleteMark.Visible = !string.IsNullOrEmpty(_markPath);
+            btnDeletePicture.Visible = !string.IsNullOrEmpty(_picturePath);
+            btnSafe.Visible = (!string.IsNullOrEmpty(_markPath) && !string.IsNullOrEmpty(_picturePath));
         }
 
         string SaveImage(Image mergeImage)
         {
-            var mergedImagePath = Path.Combine(Path.GetDirectoryName(picturePath),
-                Path.GetFileNameWithoutExtension(picturePath) + "_merged" + Path.GetExtension(picturePath));
+            var mergedImagePath = Path.Combine(Path.GetDirectoryName(_picturePath),
+                Path.GetFileNameWithoutExtension(_picturePath) + "_merged" + Path.GetExtension(_picturePath));
             mergeImage.Save(mergedImagePath, pbPicture.Image.RawFormat);
 
             return mergedImagePath;
+        }
+
+        private void Main_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (pbPicture.Image != null)
+                Properties.Settings.Default.PicturePath = _picturePath;
+
+            if (pbMark.Image != null)
+                Properties.Settings.Default.MarkPath = _markPath;
+
+            Properties.Settings.Default.Save();
+
         }
     }
 }

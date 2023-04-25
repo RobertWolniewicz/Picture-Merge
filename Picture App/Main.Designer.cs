@@ -123,6 +123,7 @@
             this.Controls.Add(this.pbPicture);
             this.Name = "Main";
             this.Text = "Main";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Main_FormClosing);
             ((System.ComponentModel.ISupportInitialize)(this.pbPicture)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pbMark)).EndInit();
             this.ResumeLayout(false);
